@@ -8,34 +8,48 @@ public class Enemy : MonoBehaviour
     Collider _coll;
     public Transform _playerTrans;
     public GameObject _bulletObj;
-    public Transform _shootPos;
+    public Transform _shootTrans;
     public ParticleSystem _bloodParticle;
     public Collider _gunColl;
-
+    public Collider _handLColl;
+    public Collider _handRColl;
+    Animator _animator;
+    [Header("基础属性")]
     public float _speed;
+    public float _rotationSpeed;
     public int _hp;
     [HideInInspector] public int _currentHp;
     public float _deadTime;
     float _currentDeadTime;
-    public int _attackValue;
-    public float _attackTime = 0.5f;
-    float _currentAttackTime;
-    public float _attackLength;
+    public float _gunAttackTime = 0.5f;
+    float _currentGunAttackTime;
+    // public float _punchAttackTime = 0.5f;
+    // float _currentPunchAttackTime;
     public float _seePlayerLength;
+    public float _gunLength;
+    public float _punchLength;
+    public List<GameObject> _gunPrefabs;
+    public float _dropGunForce;
 
     bool _isAttack;
+    bool _isGun = true;
     bool _isDead;
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
         _coll = GetComponent<Collider>();
+        _animator = GetComponent<Animator>();
     }
     private void Start()
     {
         _currentHp = _hp;
     }
-
+    private void FixedUpdate()
+    {
+        if (!_isDead)
+            Move();
+    }
     private void Update()
     {
         if (!_isDead)
@@ -43,13 +57,16 @@ public class Enemy : MonoBehaviour
             if (_currentHp <= 0)
             {
                 _currentHp = 0;
+                _gunColl.gameObject.SetActive(false);
+                DropGun(0);
                 _isDead = true;
             }
-            Move();
         }
         else
         {
-            _gunColl.enabled = false;
+            //_gunColl.enabled = false;
+            _handLColl.enabled = false;
+            _handRColl.enabled = false;
             _rb.constraints = RigidbodyConstraints.None;
             _currentDeadTime += Time.deltaTime;
             if (_currentDeadTime > _deadTime)
@@ -81,18 +98,44 @@ public class Enemy : MonoBehaviour
             //旋转
             Vector3 seeDir = new Vector3(_playerTrans.position.x - transform.position.x, 0, _playerTrans.position.z - transform.position.z).normalized;
             if (seeDir.sqrMagnitude > 0.001f)
-                transform.rotation = Quaternion.LookRotation(seeDir, Vector3.up);
-            //移动
-            if (playerToLength > _attackLength * _attackLength)
-                _rb.velocity = transform.forward * _speed;
-            _currentAttackTime += Time.deltaTime;
-            //攻击
-            if (_currentAttackTime >= _attackTime)
             {
-                _currentAttackTime = 0;
-                Instantiate(_bulletObj, _shootPos.position, Quaternion.LookRotation(seeDir, Vector3.up));
+                Quaternion targetRotation = Quaternion.LookRotation(seeDir, Vector3.up);
+                if (Vector3.Angle(transform.forward, seeDir) > 1.0f)
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * _rotationSpeed);
+            }
+            //持枪
+            if (_isGun)
+            {
+                if (playerToLength > _gunLength * _gunLength)//移动
+                    _rb.velocity = transform.forward * _speed;
+                _currentGunAttackTime += Time.deltaTime;
+                if (_currentGunAttackTime >= _gunAttackTime)//攻击
+                {
+                    _currentGunAttackTime = 0;
+                    Instantiate(_bulletObj, _shootTrans.position, Quaternion.LookRotation(transform.forward, Vector3.up));
+                }
+            }
+            //空手
+            else
+            {
+                if (playerToLength > _punchLength * _punchLength)//移动
+                    _rb.velocity = transform.forward * _speed;
+                _currentGunAttackTime += Time.deltaTime;
+                if (_currentGunAttackTime >= _gunAttackTime)//攻击
+                {
+                    _currentGunAttackTime = 0;
+                    _animator.SetTrigger("tPunch");
+                }
             }
         }
+    }
+    void DropGun(int gunNum)
+    {
+        //丢出枪械
+        GameObject gunObj = Instantiate(_gunPrefabs[gunNum], _shootTrans.position, Quaternion.Euler(0, 0, 90));
+        Rigidbody gunRb = gunObj.GetComponent<Rigidbody>();
+        gunRb.AddForce(transform.forward * _dropGunForce, ForceMode.Impulse);
+        gunRb.AddTorque(new Vector3(0, 3, 0), ForceMode.Impulse);
     }
 
     private void OnCollisionEnter(Collision other)
@@ -104,6 +147,14 @@ public class Enemy : MonoBehaviour
             if (seeDir.sqrMagnitude > 0.001f)
                 _bloodParticle.transform.rotation = Quaternion.LookRotation(seeDir, Vector3.up);
             _bloodParticle.Play();
+        }
+        if (_isGun && !_isDead && other.gameObject.CompareTag("Item_brokeGun"))
+        {
+            _isGun = false;
+            _gunColl.gameObject.SetActive(false);
+            _animator.SetTrigger("tHand");
+            //丢出枪械
+            DropGun(0);
         }
     }
     private void OnTriggerEnter(Collider other)

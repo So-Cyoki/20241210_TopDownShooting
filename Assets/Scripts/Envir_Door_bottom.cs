@@ -17,9 +17,10 @@ public class Envir_Door_bottom : MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Bullet") || other.gameObject.CompareTag("PlayerPunch"))
+        if (other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("PlayerPunch") || other.gameObject.CompareTag("Item_brokeGun"))
         {
-            _isOpen = !_isOpen;
+            //_isOpen = !_isOpen;
+            _isOpen = true;
             if (_isOpen)
                 _meshRenderer.material = _downMaterial;
             else

@@ -9,6 +9,8 @@ TagManager:
   - Enemy
   - Envir_drum
   - PlayerPunch
+  - Item_brokeGun
+  - EnemyPunch
   layers:
   - Default
   - TransparentFX

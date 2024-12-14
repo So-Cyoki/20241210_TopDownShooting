@@ -97,7 +97,7 @@ public class Envir_Drum : MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.CompareTag("Bullet"))
+        if (other.gameObject.CompareTag("Bullet") || other.gameObject.CompareTag("Item_brokeGun"))
         {
             //扣血
             _currentHp -= 1;
