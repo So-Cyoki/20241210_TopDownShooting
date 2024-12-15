@@ -94,7 +94,10 @@ public class Enemy : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hitInfo))
             {
                 if (hitInfo.collider.CompareTag("Player"))
+                {
+                    _animator.SetTrigger("tAttack");
                     _isAttack = true;
+                }
             }
         }
         //攻击状态

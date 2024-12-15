@@ -587,7 +587,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerObj: {fileID: 186214351}
   _gameStartUI: {fileID: 1270160798}
-  _gameOverUI: {fileID: 1376650603}
+  _gameOver_enemyNum: {fileID: 892677332}
   _hpMask: {fileID: 1202853579}
 --- !u!1 &231303495
 GameObject:

@@ -41,7 +41,7 @@ public class Player : MonoBehaviour
     bool _isHandGunAttack = true;
     bool _isPunchR;
     [HideInInspector] public bool _isPunchAttack;
-    bool _isDead;
+    [HideInInspector] public bool _isDead;
 
     public static event Action<int, int> OnHpChange;
 

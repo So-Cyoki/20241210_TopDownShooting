@@ -1,21 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
     public GameObject _playerObj;
     public GameObject _gameStartUI;
-    public GameObject _gameOverUI;
+    public TextMeshProUGUI _gameOver_enemyNum;
     public RectTransform _hpMask;
+    Player _playerCS;
     float _hpMaskRate;
+    int _enemyDeadNum;
 
     private void Start()
     {
         _gameStartUI.SetActive(true);
-        _gameOverUI.SetActive(false);
+        _gameOver_enemyNum.text = "0";
+        _gameOver_enemyNum.transform.parent.gameObject.SetActive(false);
         _playerObj.SetActive(false);
         _hpMaskRate = _hpMask.localScale.x;
+        _playerCS = _playerObj.GetComponent<Player>();
     }
     private void Update()
     {
@@ -26,6 +32,21 @@ public class UIManager : MonoBehaviour
             {
                 _gameStartUI.SetActive(false);
                 _playerObj.SetActive(true);
+            }
+        }
+        //Game Over
+        if (_playerCS._isDead)
+        {
+            _hpMask.gameObject.SetActive(false);
+            _gameOver_enemyNum.transform.parent.gameObject.SetActive(true);
+        }
+        if (_gameOver_enemyNum.transform.parent.gameObject.activeSelf)
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                string currentSceneName = SceneManager.GetActiveScene().name;
+                SceneManager.LoadScene(currentSceneName);
+                return;
             }
         }
         //血量遮罩效果
@@ -40,16 +61,23 @@ public class UIManager : MonoBehaviour
         if (hpRate == 1f)
             _hpMaskRate = 50;
     }
+    void EnemyDeadNumAdd()
+    {
+        _enemyDeadNum++;
+        _gameOver_enemyNum.text = _enemyDeadNum + "";
+    }
 
 
 
     private void OnEnable()
     {
         Player.OnHpChange += HPMask;
+        Enemy.OnEnemyDead += EnemyDeadNumAdd;
     }
     private void OnDisable()
     {
 
         Player.OnHpChange -= HPMask;
+        Enemy.OnEnemyDead -= EnemyDeadNumAdd;
     }
 }
