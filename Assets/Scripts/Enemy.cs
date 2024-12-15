@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Enemy : MonoBehaviour
 {
@@ -35,6 +36,8 @@ public class Enemy : MonoBehaviour
     bool _isGun = true;
     bool _isDead;
 
+    public static event Action OnEnemyDead;
+
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
@@ -58,7 +61,9 @@ public class Enemy : MonoBehaviour
             {
                 _currentHp = 0;
                 _gunColl.gameObject.SetActive(false);
-                DropGun(0);
+                if (_isGun)
+                    DropGun(0);
+                OnEnemyDead?.Invoke();
                 _isDead = true;
             }
         }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Player : MonoBehaviour
 {
@@ -27,7 +28,7 @@ public class Player : MonoBehaviour
     [Header("基础属性")]
     [SerializeField] PlayerState _playerState = PlayerState.PUNCH;
     public int _hp;
-    [HideInInspector] public int _currentHp;
+    public int _currentHp;
     public float _speed;
     public float _attackTime = 0.5f;
     public float _dropGunForce;
@@ -42,6 +43,7 @@ public class Player : MonoBehaviour
     [HideInInspector] public bool _isPunchAttack;
     bool _isDead;
 
+    public static event Action<int, int> OnHpChange;
 
     private void Awake()
     {
@@ -69,6 +71,7 @@ public class Player : MonoBehaviour
         if (!_isDead && _currentHp <= 0)
         {
             _currentHp = 0;
+            OnHpChange?.Invoke(_currentHp, _hp);
             _isDead = true;
         }
         //获取鼠标位置
@@ -192,19 +195,28 @@ public class Player : MonoBehaviour
     {
         _isPunchAttack = flag != 0;
     }
+    void EnemyDead()
+    {
+        _currentHp += 2;
+        if (_currentHp > _hp)
+            _currentHp = _hp;
+        OnHpChange?.Invoke(_currentHp, _hp);
+    }
 
     private void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.CompareTag("Item_gun"))
+        if (
+            _playerState == PlayerState.PUNCH && other.gameObject.CompareTag("Item_gun"))
         {
             Destroy(other.gameObject);
             _playerState = PlayerState.HANDGUN;
             _animator.SetBool("isHandGun", true);
             _gunObj.SetActive(true);
         }
-        if (other.gameObject.CompareTag("Bullet") || other.gameObject.CompareTag("EnemyPunch"))
+        if (other.gameObject.CompareTag("Bullet"))
         {
             _currentHp -= 1;
+            OnHpChange?.Invoke(_currentHp, _hp);
             Vector3 seeDir = new Vector3(other.transform.position.x - transform.position.x, 0, other.transform.position.z - transform.position.z).normalized;
             if (seeDir.sqrMagnitude > 0.001f)
                 _bloodParticle.transform.rotation = Quaternion.LookRotation(seeDir, Vector3.up);
@@ -216,10 +228,21 @@ public class Player : MonoBehaviour
         if (other.gameObject.CompareTag("EnemyPunch"))
         {
             _currentHp -= 1;
+            OnHpChange?.Invoke(_currentHp, _hp);
             Vector3 seeDir = new Vector3(other.transform.position.x - transform.position.x, 0, other.transform.position.z - transform.position.z).normalized;
             if (seeDir.sqrMagnitude > 0.001f)
                 _bloodParticle.transform.rotation = Quaternion.LookRotation(seeDir, Vector3.up);
             _bloodParticle.Play();
         }
+    }
+
+    private void OnEnable()
+    {
+        Enemy.OnEnemyDead += EnemyDead;
+    }
+    private void OnDisable()
+    {
+
+        Enemy.OnEnemyDead -= EnemyDead;
     }
 }
