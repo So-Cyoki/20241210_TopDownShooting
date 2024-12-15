@@ -121,6 +121,7 @@ public class Enemy : MonoBehaviour
                 {
                     _currentGunAttackTime = 0;
                     Instantiate(_bulletObj, _shootTrans.position, Quaternion.LookRotation(transform.forward, Vector3.up));
+                    _animator.SetTrigger("tGunAttack");
                 }
             }
             //空手
