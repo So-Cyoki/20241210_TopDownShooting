@@ -61,6 +61,7 @@ public class Enemy : MonoBehaviour
             {
                 _currentHp = 0;
                 _gunColl.gameObject.SetActive(false);
+                _rb.AddTorque(transform.right * 3, ForceMode.VelocityChange);
                 if (_isGun)
                     DropGun(0);
                 OnEnemyDead?.Invoke();

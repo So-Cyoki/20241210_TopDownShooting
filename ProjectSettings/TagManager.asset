@@ -11,6 +11,8 @@ TagManager:
   - PlayerPunch
   - Item_brokeGun
   - EnemyPunch
+  - Item_shotGun
+  - Item_subGun
   layers:
   - Default
   - TransparentFX

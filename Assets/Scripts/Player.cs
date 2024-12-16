@@ -7,12 +7,12 @@ public class Player : MonoBehaviour
 {
     public enum PlayerState
     {
-        PUNCH, HANDGUN,
+        PUNCH, HANDGUN, SHOTGUN, SUBGUN
     }
 
     Rigidbody _rb;
     Animator _animator;
-    public GameObject _gunObj;
+    public List<GameObject> _gunObjs;
     public GameObject _bulletObj;
     public Transform _shootTrans;
     public ParticleSystem _bloodParticle;
@@ -34,15 +34,20 @@ public class Player : MonoBehaviour
     public float _dropGunForce;
     Vector3 _mousePos;
     [Header("枪械属性")]
-    public float _attackTime = 0.5f;
+    public float _handGun_attackTime;
+    public float _shotGun_attackTime;
+    public float _subGun_attackTime;
+    float _attackTime = 0.5f;
     float _currentAttackTime;
     float _punchTime = 0.18f;
     float _currentPunchTime = 0;
-    public int _current_bulletNum = 0;
+    [SerializeField] int _current_bulletNum = 0;
     public int _handGun_bulletNum;
+    public int _shotGun_bulletNum;
+    public int _subGun_bulletNum;
 
     bool _isPunchTime = false;
-    bool _isHandGunAttack = true;
+    bool _isGunAttack = true;
     bool _isPunchR;
     [HideInInspector] public bool _isPunchAttack;
     [HideInInspector] public bool _isDead;
@@ -56,7 +61,8 @@ public class Player : MonoBehaviour
     }
     private void Start()
     {
-        _gunObj.SetActive(false);
+        foreach (var obj in _gunObjs)
+            obj.SetActive(false);
         _currentAttackTime = 0;
         _currentHp = _hp;
     }
@@ -93,6 +99,8 @@ public class Player : MonoBehaviour
                     PunchAttack();
                     break;
                 case PlayerState.HANDGUN:
+                case PlayerState.SHOTGUN:
+                case PlayerState.SUBGUN:
                     GunAttack();
                     break;
             }
@@ -134,23 +142,57 @@ public class Player : MonoBehaviour
     {
         if (_current_bulletNum > 0)
         {
-            //手枪
-            if (Input.GetMouseButtonDown(0) && _isHandGunAttack)
+            //开枪(鼠标按下)
+            if (Input.GetMouseButtonDown(0) && _isGunAttack && _playerState != PlayerState.SUBGUN)
             {
-                _currentAttackTime = _attackTime;
                 Vector3 seeDir = new Vector3(_mousePos.x - transform.position.x, 0, _mousePos.z - transform.position.z).normalized;
-                GameObject bullet = Instantiate(_bulletObj, _shootTrans.position, Quaternion.LookRotation(seeDir, Vector3.up));
-                _isHandGunAttack = false;
+                switch (_playerState)
+                {
+                    case PlayerState.HANDGUN:
+                        Instantiate(_bulletObj, _shootTrans.position, Quaternion.LookRotation(seeDir, Vector3.up));
+                        break;
+                    case PlayerState.SHOTGUN:
+                        Instantiate(_bulletObj, _shootTrans.position, Quaternion.LookRotation(seeDir, Vector3.up));
+                        Vector3 shotDir = Quaternion.Euler(0, -10, 0) * seeDir;
+                        Vector3 shotPos = _shootTrans.right * -0.4f + _shootTrans.position;
+                        Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
+                        shotDir = Quaternion.Euler(0, 10, 0) * seeDir;
+                        shotPos = _shootTrans.right * 0.4f + _shootTrans.position;
+                        Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
+                        shotDir = Quaternion.Euler(0, -20, 0) * seeDir;
+                        shotPos = _shootTrans.right * -0.8f + _shootTrans.position;
+                        Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
+                        shotDir = Quaternion.Euler(0, 20, 0) * seeDir;
+                        shotPos = _shootTrans.right * 0.8f + _shootTrans.position;
+                        Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
+                        break;
+                }
                 _animator.SetTrigger("tGunAttack");
                 _current_bulletNum--;
+                _isGunAttack = false;
             }
-            if (!_isHandGunAttack)
+            //开枪(鼠标按住)
+            if (Input.GetMouseButton(0) && _isGunAttack && _playerState == PlayerState.SUBGUN)
+            {
+                Vector3 seeDir = new Vector3(_mousePos.x - transform.position.x, 0, _mousePos.z - transform.position.z).normalized;
+                switch (_playerState)
+                {
+                    case PlayerState.SUBGUN:
+                        Instantiate(_bulletObj, _shootTrans.position, Quaternion.LookRotation(seeDir, Vector3.up));
+                        break;
+                }
+                _animator.SetTrigger("tGunAttack");
+                _current_bulletNum--;
+                _isGunAttack = false;
+            }
+            //攻击间隔计时
+            if (!_isGunAttack)
             {
                 _currentAttackTime += Time.deltaTime;
                 if (_currentAttackTime > _attackTime)
                 {
                     _currentAttackTime = 0;
-                    _isHandGunAttack = true;
+                    _isGunAttack = true;
                 }
             }
         }
@@ -158,7 +200,7 @@ public class Player : MonoBehaviour
         {
             //没子弹
             _uiNoBullet_animator.transform.position = Camera.main.WorldToScreenPoint(transform.position);
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) || Input.GetMouseButton(0))
             {
                 _uiNoBullet_animator.SetTrigger("tMessage");
             }
@@ -168,13 +210,19 @@ public class Player : MonoBehaviour
     {
         if (_playerState != PlayerState.PUNCH && Input.GetMouseButtonDown(1))
         {
-            _gunObj.SetActive(false);
+            foreach (var obj in _gunObjs)
+                obj.SetActive(false);
             int gunNum = 0;
             switch (_playerState)
             {
                 case PlayerState.HANDGUN:
                     gunNum = 0;
-                    _animator.SetBool("isHandGun", false);
+                    break;
+                case PlayerState.SHOTGUN:
+                    gunNum = 1;
+                    break;
+                case PlayerState.SUBGUN:
+                    gunNum = 2;
                     break;
             }
             GameObject gunObj = Instantiate(_brokeGunPrefabs[gunNum], _shootTrans.position, Quaternion.Euler(0, 0, 90));
@@ -182,6 +230,7 @@ public class Player : MonoBehaviour
             gunRb.AddForce(transform.forward * _dropGunForce, ForceMode.Impulse);
             gunRb.AddTorque(new Vector3(0, 3, 0), ForceMode.Impulse);
             //gunObj.GetComponent<Animator>().enabled = false;
+            _animator.SetBool("isHandGun", false);
             _playerState = PlayerState.PUNCH;
         }
     }
@@ -223,15 +272,41 @@ public class Player : MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
-        if (
-            _playerState == PlayerState.PUNCH && other.gameObject.CompareTag("Item_gun"))
+        //获取枪支
+        if (_playerState == PlayerState.PUNCH)
         {
-            Destroy(other.gameObject);
-            _current_bulletNum = _handGun_bulletNum;
-            _playerState = PlayerState.HANDGUN;
-            _animator.SetBool("isHandGun", true);
-            _gunObj.SetActive(true);
+            bool isGetGun = false;
+            switch (other.gameObject.tag)
+            {
+                case "Item_gun":
+                    _attackTime = _handGun_attackTime;
+                    _current_bulletNum = _handGun_bulletNum;
+                    _playerState = PlayerState.HANDGUN;
+                    _gunObjs[0].SetActive(true);
+                    isGetGun = true;
+                    break;
+                case "Item_shotGun":
+                    _attackTime = _shotGun_attackTime;
+                    _current_bulletNum = _shotGun_bulletNum;
+                    _playerState = PlayerState.SHOTGUN;
+                    _gunObjs[1].SetActive(true);
+                    isGetGun = true;
+                    break;
+                case "Item_subGun":
+                    _attackTime = _subGun_attackTime;
+                    _current_bulletNum = _subGun_bulletNum;
+                    _playerState = PlayerState.SUBGUN;
+                    _gunObjs[2].SetActive(true);
+                    isGetGun = true;
+                    break;
+            }
+            if (isGetGun == true)
+            {
+                Destroy(other.gameObject);
+                _animator.SetBool("isHandGun", true);
+            }
         }
+        //被子弹击中
         if (other.gameObject.CompareTag("Bullet"))
         {
             _currentHp -= 1;
@@ -244,6 +319,7 @@ public class Player : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
+        //被敌人拳头击中
         if (other.gameObject.CompareTag("EnemyPunch"))
         {
             _currentHp -= 1;

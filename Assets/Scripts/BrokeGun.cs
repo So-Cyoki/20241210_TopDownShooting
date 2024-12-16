@@ -7,7 +7,7 @@ public class BrokeGun : MonoBehaviour
     public ParticleSystem _brokeParticle;
     public BoxCollider _coll;
 
-    public float _lifeTime;
+    public float _lifeTime = 2;
     float _currentLifeTime;
 
     bool _isPlayParticle;
