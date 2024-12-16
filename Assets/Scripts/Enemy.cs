@@ -5,13 +5,19 @@ using System;
 
 public class Enemy : MonoBehaviour
 {
+    public enum EnemyState
+    {
+        PUNCH, HANDGUN, SHOTGUN, SUBGUN
+    }
     Rigidbody _rb;
     Collider _coll;
+
     public Transform _playerTrans;
+    public EnemyState _enemyState = EnemyState.HANDGUN;
     public GameObject _bulletObj;
     public Transform _shootTrans;
     public ParticleSystem _bloodParticle;
-    public Collider _gunColl;
+    public List<Collider> _gunColls;
     public Collider _handLColl;
     public Collider _handRColl;
     Animator _animator;
@@ -22,18 +28,21 @@ public class Enemy : MonoBehaviour
     [HideInInspector] public int _currentHp;
     public float _deadTime;
     float _currentDeadTime;
-    public float _gunAttackTime = 0.5f;
-    float _currentGunAttackTime;
     // public float _punchAttackTime = 0.5f;
     // float _currentPunchAttackTime;
     public float _seePlayerLength;
     public float _gunLength;
     public float _punchLength;
+    [Header("枪械属性")]
     public List<GameObject> _gunPrefabs;
+    float _gunAttackTime;
+    float _currentGunAttackTime;
+    public float _handGun_attackTime = 0.5f;
+    public float _shotGun_attackTime = 0.5f;
+    public float _subGun_attackTime = 0.5f;
     public float _dropGunForce;
 
     bool _isAttack;
-    bool _isGun = true;
     bool _isDead;
 
     public static event Action OnEnemyDead;
@@ -47,6 +56,23 @@ public class Enemy : MonoBehaviour
     private void Start()
     {
         _currentHp = _hp;
+        foreach (var coll in _gunColls)
+            coll.gameObject.SetActive(false);
+        switch (_enemyState)
+        {
+            case EnemyState.HANDGUN:
+                _gunColls[0].gameObject.SetActive(true);
+                _gunAttackTime = _handGun_attackTime;
+                break;
+            case EnemyState.SHOTGUN:
+                _gunColls[1].gameObject.SetActive(true);
+                _gunAttackTime = _shotGun_attackTime;
+                break;
+            case EnemyState.SUBGUN:
+                _gunColls[2].gameObject.SetActive(true);
+                _gunAttackTime = _subGun_attackTime;
+                break;
+        }
     }
     private void FixedUpdate()
     {
@@ -60,10 +86,21 @@ public class Enemy : MonoBehaviour
             if (_currentHp <= 0)
             {
                 _currentHp = 0;
-                _gunColl.gameObject.SetActive(false);
+                foreach (var coll in _gunColls)
+                    coll.gameObject.SetActive(false);
                 _rb.AddTorque(transform.right * 3, ForceMode.VelocityChange);
-                if (_isGun)
-                    DropGun(0);
+                switch (_enemyState)
+                {
+                    case EnemyState.HANDGUN:
+                        DropGun(0);
+                        break;
+                    case EnemyState.SHOTGUN:
+                        DropGun(1);
+                        break;
+                    case EnemyState.SUBGUN:
+                        DropGun(2);
+                        break;
+                }
                 OnEnemyDead?.Invoke();
                 _isDead = true;
             }
@@ -113,15 +150,36 @@ public class Enemy : MonoBehaviour
                     transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * _rotationSpeed);
             }
             //持枪
-            if (_isGun)
+            if (_enemyState != EnemyState.PUNCH)
             {
                 if (playerToLength > _gunLength * _gunLength)//移动
                     _rb.velocity = transform.forward * _speed;
                 _currentGunAttackTime += Time.deltaTime;
                 if (_currentGunAttackTime >= _gunAttackTime)//攻击
                 {
+                    switch (_enemyState)
+                    {
+                        case EnemyState.HANDGUN:
+                        case EnemyState.SUBGUN:
+                            Instantiate(_bulletObj, _shootTrans.position, Quaternion.LookRotation(transform.forward, Vector3.up));
+                            break;
+                        case EnemyState.SHOTGUN:
+                            Instantiate(_bulletObj, _shootTrans.position, Quaternion.LookRotation(seeDir, Vector3.up));
+                            Vector3 shotDir = Quaternion.Euler(0, -10, 0) * seeDir;
+                            Vector3 shotPos = _shootTrans.right * -0.4f + _shootTrans.position;
+                            Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
+                            shotDir = Quaternion.Euler(0, 10, 0) * seeDir;
+                            shotPos = _shootTrans.right * 0.4f + _shootTrans.position;
+                            Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
+                            shotDir = Quaternion.Euler(0, -20, 0) * seeDir;
+                            shotPos = _shootTrans.right * -0.8f + _shootTrans.position;
+                            Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
+                            shotDir = Quaternion.Euler(0, 20, 0) * seeDir;
+                            shotPos = _shootTrans.right * 0.8f + _shootTrans.position;
+                            Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
+                            break;
+                    }
                     _currentGunAttackTime = 0;
-                    Instantiate(_bulletObj, _shootTrans.position, Quaternion.LookRotation(transform.forward, Vector3.up));
                     _animator.SetTrigger("tGunAttack");
                 }
             }
@@ -158,13 +216,25 @@ public class Enemy : MonoBehaviour
                 _bloodParticle.transform.rotation = Quaternion.LookRotation(seeDir, Vector3.up);
             _bloodParticle.Play();
         }
-        if (_isGun && !_isDead && other.gameObject.CompareTag("Item_brokeGun"))
+        if (_enemyState != EnemyState.PUNCH && !_isDead && other.gameObject.CompareTag("Item_brokeGun"))
         {
-            _isGun = false;
-            _gunColl.gameObject.SetActive(false);
-            _animator.SetTrigger("tHand");
             //丢出枪械
-            DropGun(0);
+            switch (_enemyState)
+            {
+                case EnemyState.HANDGUN:
+                    DropGun(0);
+                    break;
+                case EnemyState.SHOTGUN:
+                    DropGun(1);
+                    break;
+                case EnemyState.SUBGUN:
+                    DropGun(2);
+                    break;
+            }
+            _enemyState = EnemyState.PUNCH;
+            foreach (var coll in _gunColls)
+                coll.gameObject.SetActive(false);
+            _animator.SetTrigger("tHand");
         }
     }
     private void OnTriggerEnter(Collider other)
