@@ -16,19 +16,19 @@ public class Help_noBulletCollider : MonoBehaviour
     }
     private void LateUpdate()
     {
-        if (_playerCS != null)
-        {
-            if (_playerCS._playerState == Player.PlayerState.PUNCH
-            && _bornGunPrefab == null)
-            {
-                _currentBornTime += Time.deltaTime;
-                if (_currentBornTime > _bornTime)
-                {
-                    _currentBornTime = 0;
-                    _bornGunPrefab = Instantiate(_gunPrefab, _bornTrans.position, Quaternion.Euler(0, 0, 90));
-                }
-            }
-        }
+        // if (_playerCS != null)
+        // {
+        //     if (_playerCS._playerState == Player.PlayerState.PUNCH
+        //     && _bornGunPrefab == null)
+        //     {
+        //         _currentBornTime += Time.deltaTime;
+        //         if (_currentBornTime > _bornTime)
+        //         {
+        //             _currentBornTime = 0;
+        //             _bornGunPrefab = Instantiate(_gunPrefab, _bornTrans.position, Quaternion.Euler(0, 0, 90));
+        //         }
+        //     }
+        // }
     }
     private void OnTriggerEnter(Collider other)
     {
