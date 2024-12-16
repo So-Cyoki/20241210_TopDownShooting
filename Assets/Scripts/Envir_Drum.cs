@@ -72,6 +72,12 @@ public class Envir_Drum : MonoBehaviour
             case "Envir_drum":
                 coll.GetComponent<Envir_Drum>()._currentHp -= _attackVaule;
                 break;
+            case "Envir_cube":
+                dir = (coll.transform.position - transform.position).normalized;
+                dir = (dir + Vector3.up).normalized;
+                coll.GetComponent<Rigidbody>().AddForce(dir * _boomForce, ForceMode.VelocityChange);
+                coll.GetComponent<Rigidbody>().AddTorque(new Vector3(0, 10, 0), ForceMode.VelocityChange);
+                break;
         }
     }
     public void BoomDamageEnd()

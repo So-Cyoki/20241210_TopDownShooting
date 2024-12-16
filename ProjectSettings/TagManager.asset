@@ -13,6 +13,7 @@ TagManager:
   - EnemyPunch
   - Item_shotGun
   - Item_subGun
+  - Envir_cube
   layers:
   - Default
   - TransparentFX

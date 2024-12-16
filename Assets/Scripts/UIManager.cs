@@ -9,6 +9,7 @@ public class UIManager : MonoBehaviour
     public GameObject _playerObj;
     public GameObject _gameStartUI;
     public TextMeshProUGUI _gameOver_enemyNum;
+    public TextMeshProUGUI _gameClear_enemyNum;
     public RectTransform _hpMask;
     public GameObject _help3DUI;
     Player _playerCS;
@@ -20,6 +21,8 @@ public class UIManager : MonoBehaviour
         _gameStartUI.SetActive(true);
         _gameOver_enemyNum.text = "0";
         _gameOver_enemyNum.transform.parent.gameObject.SetActive(false);
+        _gameClear_enemyNum.text = "0";
+        _gameClear_enemyNum.transform.parent.gameObject.SetActive(false);
         _playerObj.SetActive(false);
         _hpMaskRate = _hpMask.localScale.x;
         _playerCS = _playerObj.GetComponent<Player>();
@@ -55,6 +58,18 @@ public class UIManager : MonoBehaviour
                 return;
             }
         }
+        //Game Clear
+        if (_gameClear_enemyNum.transform.parent.gameObject.activeSelf)
+        {
+            _hpMask.gameObject.SetActive(false);
+            _playerCS.gameObject.SetActive(false);
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                string currentSceneName = SceneManager.GetActiveScene().name;
+                SceneManager.LoadScene(currentSceneName);
+                return;
+            }
+        }
         //血量遮罩效果
         Vector3 maskVector = new(_hpMaskRate, _hpMaskRate, _hpMaskRate);
         _hpMask.localScale = Vector3.Lerp(_hpMask.localScale, maskVector, 0.1f);
@@ -71,6 +86,7 @@ public class UIManager : MonoBehaviour
     {
         _enemyDeadNum++;
         _gameOver_enemyNum.text = _enemyDeadNum + "";
+        _gameClear_enemyNum.text = _enemyDeadNum + "";
     }
 
 

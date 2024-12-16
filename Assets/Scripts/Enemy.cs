@@ -164,30 +164,39 @@ public class Enemy : MonoBehaviour
                 _currentGunAttackTime += Time.deltaTime;
                 if (_currentGunAttackTime >= _gunAttackTime)//攻击
                 {
-                    switch (_enemyState)
+                    //查看Player在不在眼前
+                    int layerMask = ~(1 << LayerMask.NameToLayer("Character") | 1 << LayerMask.NameToLayer("Item") | 1 << LayerMask.NameToLayer("Punch"));
+                    Ray ray = new(transform.position, (_playerTrans.position - transform.position).normalized);
+                    if (Physics.Raycast(ray, out RaycastHit hitInfo, _seePlayerLength, layerMask))
                     {
-                        case EnemyState.HANDGUN:
-                        case EnemyState.SUBGUN:
-                            Instantiate(_bulletObj, _shootTrans.position, Quaternion.LookRotation(transform.forward, Vector3.up));
-                            break;
-                        case EnemyState.SHOTGUN:
-                            Instantiate(_bulletObj, _shootTrans.position, Quaternion.LookRotation(seeDir, Vector3.up));
-                            Vector3 shotDir = Quaternion.Euler(0, -10, 0) * seeDir;
-                            Vector3 shotPos = _shootTrans.right * -0.4f + _shootTrans.position;
-                            Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
-                            shotDir = Quaternion.Euler(0, 10, 0) * seeDir;
-                            shotPos = _shootTrans.right * 0.4f + _shootTrans.position;
-                            Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
-                            shotDir = Quaternion.Euler(0, -20, 0) * seeDir;
-                            shotPos = _shootTrans.right * -0.8f + _shootTrans.position;
-                            Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
-                            shotDir = Quaternion.Euler(0, 20, 0) * seeDir;
-                            shotPos = _shootTrans.right * 0.8f + _shootTrans.position;
-                            Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
-                            break;
+                        if (hitInfo.collider.CompareTag("Player") || hitInfo.collider.CompareTag("PlayerPunch"))
+                        {
+                            switch (_enemyState)
+                            {
+                                case EnemyState.HANDGUN:
+                                case EnemyState.SUBGUN:
+                                    Instantiate(_bulletObj, _shootTrans.position, Quaternion.LookRotation(transform.forward, Vector3.up));
+                                    break;
+                                case EnemyState.SHOTGUN:
+                                    Instantiate(_bulletObj, _shootTrans.position, Quaternion.LookRotation(seeDir, Vector3.up));
+                                    Vector3 shotDir = Quaternion.Euler(0, -10, 0) * seeDir;
+                                    Vector3 shotPos = _shootTrans.right * -0.4f + _shootTrans.position;
+                                    Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
+                                    shotDir = Quaternion.Euler(0, 10, 0) * seeDir;
+                                    shotPos = _shootTrans.right * 0.4f + _shootTrans.position;
+                                    Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
+                                    shotDir = Quaternion.Euler(0, -20, 0) * seeDir;
+                                    shotPos = _shootTrans.right * -0.8f + _shootTrans.position;
+                                    Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
+                                    shotDir = Quaternion.Euler(0, 20, 0) * seeDir;
+                                    shotPos = _shootTrans.right * 0.8f + _shootTrans.position;
+                                    Instantiate(_bulletObj, shotPos, Quaternion.LookRotation(shotDir, Vector3.up));
+                                    break;
+                            }
+                            _currentGunAttackTime = 0;
+                            _animator.SetTrigger("tGunAttack");
+                        }
                     }
-                    _currentGunAttackTime = 0;
-                    _animator.SetTrigger("tGunAttack");
                 }
             }
             //空手

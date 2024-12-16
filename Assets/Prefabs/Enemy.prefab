@@ -1058,7 +1058,7 @@ MonoBehaviour:
   _hp: 5
   _currentHp: 0
   _deadTime: 5
-  _seePlayerLength: 50
+  _seePlayerLength: 20
   _gunLength: 10
   _punchLength: 3
   _gunPrefabs:
