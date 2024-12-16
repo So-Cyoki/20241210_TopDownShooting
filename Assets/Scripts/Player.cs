@@ -69,7 +69,9 @@ public class Player : MonoBehaviour
     private void FixedUpdate()
     {
         if (!_isDead)
+        {
             Move();
+        }
         else
         {
             _rb.constraints = RigidbodyConstraints.None;

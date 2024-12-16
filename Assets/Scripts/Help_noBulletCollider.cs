@@ -10,6 +10,10 @@ public class Help_noBulletCollider : MonoBehaviour
     float _currentBornTime;
     Player _playerCS;
     GameObject _bornGunPrefab;
+    private void Start()
+    {
+        //_currentBornTime = _bornTime;
+    }
     private void LateUpdate()
     {
         if (_playerCS != null)
