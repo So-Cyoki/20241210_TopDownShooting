@@ -10,6 +10,7 @@ public class UIManager : MonoBehaviour
     public GameObject _gameStartUI;
     public TextMeshProUGUI _gameOver_enemyNum;
     public RectTransform _hpMask;
+    public GameObject _help3DUI;
     Player _playerCS;
     float _hpMaskRate;
     int _enemyDeadNum;
@@ -22,6 +23,7 @@ public class UIManager : MonoBehaviour
         _playerObj.SetActive(false);
         _hpMaskRate = _hpMask.localScale.x;
         _playerCS = _playerObj.GetComponent<Player>();
+        _help3DUI.SetActive(false);
     }
     private void Update()
     {
@@ -33,6 +35,10 @@ public class UIManager : MonoBehaviour
                 _gameStartUI.SetActive(false);
                 _playerObj.SetActive(true);
             }
+        }
+        else
+        {
+            _help3DUI.SetActive(true);
         }
         //Game Over
         if (_playerCS._isDead)

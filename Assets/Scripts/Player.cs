@@ -27,7 +27,7 @@ public class Player : MonoBehaviour
     public float _cameraMoveTime;
     Vector3 _cameraVeloctiy;
     [Header("基础属性")]
-    [SerializeField] PlayerState _playerState = PlayerState.PUNCH;
+    public PlayerState _playerState = PlayerState.PUNCH;
     public int _hp;
     public int _currentHp;
     public float _speed;
@@ -41,7 +41,7 @@ public class Player : MonoBehaviour
     float _currentAttackTime;
     float _punchTime = 0.18f;
     float _currentPunchTime = 0;
-    [SerializeField] int _current_bulletNum = 0;
+    public int _current_bulletNum = 0;
     public int _handGun_bulletNum;
     public int _shotGun_bulletNum;
     public int _subGun_bulletNum;

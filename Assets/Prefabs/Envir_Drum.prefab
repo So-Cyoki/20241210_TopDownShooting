@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5636662516807971298}
   - component: {fileID: 5323527561829042038}
   - component: {fileID: 4610285683792000603}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Cylinder (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -92,7 +92,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 746691377318093223}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -128,7 +128,7 @@ GameObject:
   - component: {fileID: 261139127680858517}
   - component: {fileID: 8911710638868874572}
   - component: {fileID: 7475452323992992507}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: BoomParticle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4958,7 +4958,7 @@ GameObject:
   - component: {fileID: 2113076104031975081}
   - component: {fileID: 5251645239783699710}
   - component: {fileID: 8018334784934592062}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: DrumParticle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9788,7 +9788,7 @@ GameObject:
   - component: {fileID: 125136171579421286}
   - component: {fileID: 4354221082605253721}
   - component: {fileID: 2557833319532274129}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Cylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9873,7 +9873,7 @@ GameObject:
   - component: {fileID: 7428620334899448041}
   - component: {fileID: 1897906027736875819}
   - component: {fileID: 5876126064321298653}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Envir_Drum
   m_TagString: Envir_drum
   m_Icon: {fileID: 0}
@@ -10002,7 +10002,7 @@ GameObject:
   - component: {fileID: 7172973668534743324}
   - component: {fileID: 8677193516188329098}
   - component: {fileID: 4945561056971789965}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: HpDownParticle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14834,7 +14834,7 @@ GameObject:
   - component: {fileID: 652936750519407930}
   - component: {fileID: 7969750209450906490}
   - component: {fileID: 8216151828656587249}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Boom
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14951,7 +14951,7 @@ GameObject:
   - component: {fileID: 8115976089779725612}
   - component: {fileID: 4330571837234647563}
   - component: {fileID: 4402388359882519913}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Cylinder (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

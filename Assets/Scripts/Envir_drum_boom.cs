@@ -8,8 +8,9 @@ public class Envir_drum_boom : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         //判断是否撞墙
+        int layerMask = ~(1 << LayerMask.NameToLayer("Item") | 1 << LayerMask.NameToLayer("Punch"));
         Ray ray = new(transform.position, (other.transform.position - transform.position).normalized);
-        if (Physics.Raycast(ray, out RaycastHit hitInfo))
+        if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity, layerMask))
         {
             if (hitInfo.collider == other)
             {

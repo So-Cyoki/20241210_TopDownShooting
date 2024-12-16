@@ -14,6 +14,7 @@ public class Enemy : MonoBehaviour
 
     public Transform _playerTrans;
     public EnemyState _enemyState = EnemyState.HANDGUN;
+    public bool _isDrawRay;
     public GameObject _bulletObj;
     public Transform _shootTrans;
     public ParticleSystem _bloodParticle;
@@ -43,7 +44,7 @@ public class Enemy : MonoBehaviour
     public float _dropGunForce;
 
     bool _isAttack;
-    bool _isDead;
+    [HideInInspector] public bool _isDead;
 
     public static event Action OnEnemyDead;
 
@@ -60,6 +61,9 @@ public class Enemy : MonoBehaviour
             coll.gameObject.SetActive(false);
         switch (_enemyState)
         {
+            case EnemyState.PUNCH:
+                _animator.SetTrigger("tHand");
+                break;
             case EnemyState.HANDGUN:
                 _gunColls[0].gameObject.SetActive(true);
                 _gunAttackTime = _handGun_attackTime;
@@ -128,10 +132,13 @@ public class Enemy : MonoBehaviour
         float playerToLength = (_playerTrans.position - transform.position).sqrMagnitude;
         if (playerToLength < _seePlayerLength * _seePlayerLength)
         {
+            int layerMask = ~(1 << LayerMask.NameToLayer("Character") | 1 << LayerMask.NameToLayer("Item") | 1 << LayerMask.NameToLayer("Punch"));
             Ray ray = new(transform.position, (_playerTrans.position - transform.position).normalized);
-            if (Physics.Raycast(ray, out RaycastHit hitInfo))
+            if (_isDrawRay)
+                Debug.DrawRay(transform.position, (_playerTrans.position - transform.position).normalized * _seePlayerLength, Color.red, 0.5f);
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, _seePlayerLength, layerMask))
             {
-                if (hitInfo.collider.CompareTag("Player"))
+                if (hitInfo.collider.CompareTag("Player") || hitInfo.collider.CompareTag("PlayerPunch"))
                 {
                     _animator.SetTrigger("tAttack");
                     _isAttack = true;
@@ -202,7 +209,8 @@ public class Enemy : MonoBehaviour
         //丢出枪械
         GameObject gunObj = Instantiate(_gunPrefabs[gunNum], _shootTrans.position, Quaternion.Euler(0, 0, 90));
         Rigidbody gunRb = gunObj.GetComponent<Rigidbody>();
-        gunRb.AddForce(transform.forward * _dropGunForce, ForceMode.Impulse);
+        Vector3 dropDir = Quaternion.Euler(-60, 0, 0) * transform.forward;
+        gunRb.AddForce(dropDir * _dropGunForce, ForceMode.Impulse);
         gunRb.AddTorque(new Vector3(0, 3, 0), ForceMode.Impulse);
     }
 
@@ -211,6 +219,11 @@ public class Enemy : MonoBehaviour
         if (other.gameObject.CompareTag("Bullet"))
         {
             _currentHp -= 1;
+            if (!_isAttack)
+            {
+                _animator.SetTrigger("tAttack");
+                _isAttack = true;
+            }
             Vector3 seeDir = new Vector3(other.transform.position.x - transform.position.x, 0, other.transform.position.z - transform.position.z).normalized;
             if (seeDir.sqrMagnitude > 0.001f)
                 _bloodParticle.transform.rotation = Quaternion.LookRotation(seeDir, Vector3.up);

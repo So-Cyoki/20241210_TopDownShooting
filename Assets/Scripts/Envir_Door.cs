@@ -6,18 +6,26 @@ public class Envir_Door : MonoBehaviour
 {
     public Transform _doorTrans;
     public List<Envir_Door_bottom> _bottomList;
+    public List<Enemy> _enemyList;
     public float _speed;
 
     bool _isOpen;
 
     private void LateUpdate()
     {
-        //按钮判断
         bool isAllDoorOpem = false;
-        foreach (var cs in _bottomList)
-        {
-            isAllDoorOpem = cs._isOpen;
-        }
+        //按钮判断
+        if (_bottomList.Count > 0)
+            foreach (var cs in _bottomList)
+            {
+                isAllDoorOpem = cs._isOpen;
+            }
+        //敌人判断
+        if (_enemyList.Count > 0)
+            foreach (var cs in _enemyList)
+            {
+                isAllDoorOpem = cs._isDead;
+            }
         if (isAllDoorOpem)
             _isOpen = true;
         //Door移动
