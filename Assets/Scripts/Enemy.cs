@@ -24,6 +24,7 @@ public class Enemy : MonoBehaviour
     Animator _animator;
     [Header("基础属性")]
     public float _speed;
+    public float _noGunSpeed;
     public float _rotationSpeed;
     public int _hp;
     [HideInInspector] public int _currentHp;
@@ -80,6 +81,8 @@ public class Enemy : MonoBehaviour
     }
     private void FixedUpdate()
     {
+        _rb.AddForce(Vector3.down * 20, ForceMode.Acceleration);//总是会跳起来，给一个向下的力量
+
         if (!_isDead)
             Move();
     }
@@ -165,7 +168,7 @@ public class Enemy : MonoBehaviour
                 if (_currentGunAttackTime >= _gunAttackTime)//攻击
                 {
                     //查看Player在不在眼前
-                    int layerMask = ~(1 << LayerMask.NameToLayer("Character") | 1 << LayerMask.NameToLayer("Item") | 1 << LayerMask.NameToLayer("Punch"));
+                    int layerMask = ~(1 << LayerMask.NameToLayer("Character") | 1 << LayerMask.NameToLayer("Punch"));
                     Ray ray = new(transform.position, (_playerTrans.position - transform.position).normalized);
                     if (Physics.Raycast(ray, out RaycastHit hitInfo, _seePlayerLength, layerMask))
                     {
@@ -203,7 +206,7 @@ public class Enemy : MonoBehaviour
             else
             {
                 if (playerToLength > _punchLength * _punchLength)//移动
-                    _rb.velocity = transform.forward * _speed;
+                    _rb.velocity = transform.forward * _noGunSpeed;
                 _currentGunAttackTime += Time.deltaTime;
                 if (_currentGunAttackTime >= _gunAttackTime)//攻击
                 {
@@ -253,10 +256,12 @@ public class Enemy : MonoBehaviour
                     DropGun(2);
                     break;
             }
+            if (!_isAttack)
+                _isAttack = true;
             _enemyState = EnemyState.PUNCH;
+            _animator.SetTrigger("tHand");
             foreach (var coll in _gunColls)
                 coll.gameObject.SetActive(false);
-            _animator.SetTrigger("tHand");
         }
     }
     private void OnTriggerEnter(Collider other)

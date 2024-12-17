@@ -80,7 +80,12 @@ public class Envir_Drum : MonoBehaviour
                 break;
         }
     }
-    public void BoomDamageEnd()
+    public void BoomDamageStart()//动画事件
+    {
+        _rb.isKinematic = true;
+        _coll.enabled = false;
+    }
+    public void BoomDamageEnd()//动画事件
     {
         _boomColl.enabled = false;
     }
@@ -95,9 +100,10 @@ public class Envir_Drum : MonoBehaviour
         _boomParticle.transform.rotation = Quaternion.identity;
         _boomParticle.Play();
     }
-    public void ToDead()
+    public void ToDead()//动画事件
     {
         _isDead = true;
+        _rb.isKinematic = false;
         _coll.enabled = false;
     }
 

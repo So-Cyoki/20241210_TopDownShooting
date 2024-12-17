@@ -68,6 +68,8 @@ public class Player : MonoBehaviour
     }
     private void FixedUpdate()
     {
+        _rb.AddForce(Vector3.down * 20, ForceMode.Acceleration);//总是会跳起来，给一个向下的力量
+
         if (!_isDead)
         {
             Move();

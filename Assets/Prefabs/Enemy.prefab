@@ -1054,6 +1054,7 @@ MonoBehaviour:
   _handLColl: {fileID: 7389730100237640941}
   _handRColl: {fileID: 2735322811472559830}
   _speed: 5
+  _noGunSpeed: 8
   _rotationSpeed: 5
   _hp: 5
   _currentHp: 0
